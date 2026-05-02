@@ -1,0 +1,63 @@
+<% content_for :title, "Todo 一覧" %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Todo 一覧</h2>
+  <%= link_to "＋ 新しい Todo", new_todo_path, class: "btn btn-primary" %>
+</div>
+
+<% if @todos.empty? %>
+  <div class="text-center text-muted py-5">
+    <p class="fs-5">Todo がまだありません。</p>
+    <%= link_to "最初の Todo を作成する", new_todo_path, class: "btn btn-outline-primary" %>
+  </div>
+<% else %>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 3rem"></th>
+          <th>タイトル</th>
+          <th>期限日</th>
+          <th>タグ</th>
+          <th class="text-end">操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @todos.each do |todo| %>
+          <tr class="<%= 'table-success' if todo.completed %>">
+            <td>
+              <%= button_to toggle_todo_path(todo), method: :patch,
+                    class: "btn btn-sm #{ todo.completed ? 'btn-success' : 'btn-outline-secondary' }",
+                    title: todo.completed ? '未完了に戻す' : '完了にする' do %>
+                <%= todo.completed ? '✓' : '○' %>
+              <% end %>
+            </td>
+            <td>
+              <span class="<%= 'text-decoration-line-through text-muted' if todo.completed %>">
+                <%= link_to todo.title, todo, class: "text-decoration-none text-dark fw-semibold" %>
+              </span>
+            </td>
+            <td>
+              <% if todo.due_date %>
+                <span class="badge <%= todo.due_date < Date.today && !todo.completed ? 'bg-danger' : 'bg-secondary' %>">
+                  <%= todo.due_date.strftime("%Y/%m/%d") %>
+                </span>
+              <% end %>
+            </td>
+            <td>
+              <% todo.tags.to_s.split(",").map(&:strip).reject(&:empty?).each do |tag| %>
+                <span class="badge bg-info text-dark me-1"><%= tag %></span>
+              <% end %>
+            </td>
+            <td class="text-end">
+              <%= link_to "編集", edit_todo_path(todo), class: "btn btn-sm btn-outline-primary me-1" %>
+              <%= button_to "削除", todo, method: :delete,
+                    class: "btn btn-sm btn-outline-danger",
+                    data: { turbo_confirm: "削除してよろしいですか？" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
